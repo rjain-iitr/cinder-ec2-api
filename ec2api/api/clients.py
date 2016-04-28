@@ -152,7 +152,7 @@ def cinder(context):
     management_url = _url_for(context, service_type='volumev2')
     _cinder.client.auth_token = context.auth_token
     _cinder.client.management_url = management_url
-
+    _cinder.client.request_id = context.request_id
     return _cinder
 
 
