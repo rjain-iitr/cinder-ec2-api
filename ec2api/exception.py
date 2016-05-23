@@ -385,11 +385,13 @@ class InvalidAMIIDNotFound(EC2NotFoundException):
 
 
 class InvalidVolumeNotFound(EC2NotFoundException):
+    code = 404
     ec2_code = 'InvalidVolume.NotFound'
     msg_fmt = _("The volume '%(id)s' does not exist.")
 
 
 class InvalidSnapshotNotFound(EC2NotFoundException):
+    code = 404
     ec2_code = 'InvalidSnapshot.NotFound'
     msg_fmt = _("Snapshot %(id)s could not be found.")
 
