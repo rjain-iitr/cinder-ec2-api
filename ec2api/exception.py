@@ -157,7 +157,7 @@ class Unsupported(EC2Exception):
 
 
 class UnsupportedOperation(EC2Exception):
-    msg_fmt = _('The specified request includes an unsupported operation.')
+    msg_fmt = _('The specified request is unsupported. %(reason)s')
 
 
 class OperationNotPermitted(EC2Exception):
