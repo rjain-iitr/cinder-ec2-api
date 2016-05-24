@@ -74,9 +74,9 @@ def delete_volume(context, volume_id):
     cinder = clients.cinder(context)
     try:
         cinder.volumes.delete(volume_id)
-    except cinder_exception.BadRequest:
+    except cinder_exception.BadRequest as e:
         # TODO(andrey-mp): raise correct errors for different cases
-        raise exception.UnsupportedOperation()
+        raise exception.UnsupportedOperation(e.message)
     except cinder_exception.NotFound:
         raise exception.InvalidVolumeNotFound(id=volume_id)
     # NOTE(andrey-mp) Don't delete item from DB until it disappears from Cloud

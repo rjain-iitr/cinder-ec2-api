@@ -153,6 +153,9 @@ def cinder(context):
     _cinder.client.auth_token = context.auth_token
     _cinder.client.management_url = management_url
     _cinder.client.request_id = context.request_id
+    _cinder.client.projectid = context.project_id
+    _cinder.client.user_id = context.user_id
+
     return _cinder
 
 

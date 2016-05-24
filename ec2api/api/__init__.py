@@ -225,7 +225,7 @@ class EC2KeystoneAuth(wsgi.Middleware):
 #            # Not part of authentication arg
 #       #params.pop('Signature', None)
 
-        token_id = req.params.get('TokenId')
+        #token_id = req.params.get('TokenId')
         user_id = req.params.get('UserId')
         project_id = req.params.get('ProjectId')
         request_id = req.params.get('RequestId')
@@ -243,18 +243,18 @@ class EC2KeystoneAuth(wsgi.Middleware):
             LOG.error("Error in retrieving metrics:")
             LOG.exception(e)
 
-        if (not token_id) or (not user_id) or (not project_id) :
+        if  (not user_id) or (not project_id) :
             msg = _("Missing Authorization Credentials.")
             return faults.ec2_error_response(request_id, "AuthFailure", msg,
                                              status=400)
 
         ctxt = context.RequestContext(user_id, 
                                       project_id,
-                                      request_id=request_id,
+                                      request_id=request_id)#,
                                       #user_name=user_name_local,
                                       #project_name=project_name_local,
                                       #roles=roles_local,
-                                      auth_token=token_id)#,
+                                      #auth_token=token_id)#,
                                       #remote_address=remote_address,
                                       #service_catalog=catalog_local,
                                       #api_version=req.params.get('Version'))
