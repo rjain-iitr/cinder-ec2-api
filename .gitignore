@@ -8,3 +8,4 @@ ec2_api.egg-info
 /functional_tests.conf*
 /buckets
 .venv
+.idea/

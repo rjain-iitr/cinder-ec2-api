@@ -26,6 +26,7 @@ import collections
 import fnmatch
 import inspect
 import operator
+from metrics.metric_util import ReportMetrics
 
 
 """Snapshot related API implementation
@@ -35,6 +36,7 @@ import operator
 Validator = common.Validator
 
 
+@ReportMetrics("cinder-client-create-snapshot", True)
 def create_snapshot(context, volume_id, description=None, name=None):
     cinder = clients.cinder(context)
     try:
@@ -56,7 +58,7 @@ def create_snapshot(context, volume_id, description=None, name=None):
 
     return _format_snapshot(context, os_snapshot)
 
-
+@ReportMetrics("cinder-client-delete-snapshot", True)
 def delete_snapshot(context, snapshot_id):
     cinder = clients.cinder(context)
     try:
@@ -165,6 +167,7 @@ def get_paged(self, formatted_items, max_results, next_token):
         return formatted_items
 
 
+@ReportMetrics("cinder-client-describe-snapshots", True)
 def describe_snapshots(context, snapshot_id=None, detail=True,
                        max_results=None, next_token=None):
     if snapshot_id is not None:

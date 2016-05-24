@@ -21,7 +21,7 @@ from ec2api.api import ec2utils
 from ec2api.db import api as db_api
 from ec2api import exception
 from ec2api.i18n import _
-
+from metrics.metric_util import ReportMetrics
 
 """Volume related API implementation
 """
@@ -30,6 +30,7 @@ from ec2api.i18n import _
 Validator = common.Validator
 
 
+@ReportMetrics("cinder-client-create-volume", True)
 def create_volume(context, size=None, snapshot_id=None,
                   name=None, description=None):
     if size is None and snapshot_id is None :
@@ -68,6 +69,7 @@ def create_volume(context, size=None, snapshot_id=None,
         return _format_volume(context, os_volume)
 
 
+@ReportMetrics("cinder-client-delete-volume", True)
 def delete_volume(context, volume_id):
     cinder = clients.cinder(context)
     try:
@@ -133,6 +135,7 @@ class VolumeDescriber(object):
         	raise exception.InvalidVolumeNotFound(id=ids)
 
 
+@ReportMetrics("cinder-client-describe-volumes", True)
 def describe_volumes(context, volume_id=None,detail=True,
                      max_results=None, next_token=None):
     if volume_id is not None :

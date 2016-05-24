@@ -35,7 +35,7 @@ from ec2api import context
 from ec2api import exception
 from ec2api.i18n import _
 from ec2api import wsgi
-
+from metrics.metric_util import MetricUtil
 
 LOG = logging.getLogger(__name__)
 
@@ -71,11 +71,37 @@ class FaultWrapper(wsgi.Middleware):
 
     @webob.dec.wsgify(RequestClass=wsgi.Request)
     def __call__(self, req):
+        # Could not use annotation for metrics here because req.get_response is not callable. This is the only way to
+        # add metrics so far. Till I find a better way
+        metricUtil = MetricUtil()
+        metrics = metricUtil.initialize_thread_local_metrics("/var/log/ec2api/service.log", "CinderEc2API")
+        response = None
         try:
-            return req.get_response(self.application)
-        except Exception:
-            LOG.exception(_("FaultWrapper cathes error"))
-            return faults.Fault(webob.exc.HTTPInternalServerError())
+            response = req.get_response(self.application)
+        except Exception as e:
+            LOG.exception(_("FaultWrapper catches error"))
+            response = faults.Fault(webob.exc.HTTPInternalServerError())
+        finally:
+            success = 0
+            fault = 0
+            error = 0
+            try:
+                status = response.status_int
+                metrics.add_property("Status", status)
+                if status > 399 and status < 500:
+                    error = 1
+                elif status > 499:
+                    fault = 1
+                else:
+                    success = 1
+            except AttributeError as e:
+                LOG.exception(e)
+            metrics.add_count("fault", fault)
+            metrics.add_count("error", error)
+            metrics.add_count("success", success)
+            metrics.close()
+        return response
+
 
 
 class RequestLogging(wsgi.Middleware):
@@ -203,8 +229,19 @@ class EC2KeystoneAuth(wsgi.Middleware):
         user_id = req.params.get('UserId')
         project_id = req.params.get('ProjectId')
         request_id = req.params.get('RequestId')
+        action = req.params.get('Action')
         if not request_id:
             request_id = context.generate_request_id()
+        try:
+            metrics = MetricUtil().fetch_thread_local_metrics()
+            metrics.add_property("ProjectId",  project_id)
+            metrics.add_property("UserId",  user_id)
+            metrics.add_property("RemoteAddress", req.remote_addr)
+            metrics.add_property("RequestId", request_id)
+            metrics.add_property("OperationName", action)
+        except Exception as e:
+            LOG.error("Error in retrieving metrics:")
+            LOG.exception(e)
 
         if (not token_id) or (not user_id) or (not project_id) :
             msg = _("Missing Authorization Credentials.")
