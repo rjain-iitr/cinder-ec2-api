@@ -32,7 +32,7 @@ Validator = common.Validator
 
 @ReportMetrics("cinder-client-create-volume", True)
 def create_volume(context, size=None, snapshot_id=None,
-                  name=None, description=None):
+                  name=None, description=None,volume_type=None,encrypted=0):
     if size is None and snapshot_id is None :
         msg = _('Parameter Size has not been specified.')
         raise exception.MissingParameter(reason=msg)
@@ -40,7 +40,7 @@ def create_volume(context, size=None, snapshot_id=None,
     cinder = clients.cinder(context)
     if snapshot_id is None :
         with common.OnCrashCleaner() as cleaner:
-            os_volume = cinder.volumes.create(size, name=name, description=description)
+            os_volume = cinder.volumes.create(size, name=name, description=description,volume_type=volume_type,encrypted=encrypted)
             cleaner.addCleanup(os_volume.delete)
             return _format_volume(context, os_volume)
 
@@ -192,6 +192,9 @@ def _format_volume(context, os_volume):
     except AttributeError:
        pass
 
+    volume_type="hdd"
+    if os_volume.volume_type !=None:
+         volume_type=os_volume.volume_type
 
     ec2_volume = {
             #'name': os_volume.name,
@@ -201,7 +204,9 @@ def _format_volume(context, os_volume):
             'status': valid_ec2_api_volume_status_map.get(os_volume.status,
                                                           os_volume.status),
             'volumeId': os_volume.id,
-            'createTime': os_volume.created_at
+            'createTime': os_volume.created_at,
+            'volumeType':volume_type,
+            'encrypted':os_volume.encrypted
     }
     if ec2_volume['status'] == 'in-use':
         ec2_volume['attachmentSet'] = (

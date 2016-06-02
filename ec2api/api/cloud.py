@@ -724,10 +724,10 @@ class CloudController(object):
 
     @module_and_param_types(volume, 'int',
                             'str', 
-                            'str','str')
+                            'str','str','str','int')
     def create_volume(self, context, size=None,
                       snapshot_id=None,
-                      name=None,description=None):
+                      name=None,description=None,volume_type=None,encrypted=0):
         """Creates an EBS volume.
 
         Args:
