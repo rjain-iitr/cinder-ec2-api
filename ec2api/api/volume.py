@@ -192,7 +192,7 @@ def _format_volume(context, os_volume):
     except AttributeError:
        pass
 
-    volume_type="hdd"
+    volume_type="standard"
     if os_volume.volume_type !=None:
          volume_type=os_volume.volume_type
 
