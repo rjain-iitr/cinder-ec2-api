@@ -48,7 +48,7 @@ def create_volume(context, size=None, snapshot_id=None,
     if size is None :
         with common.OnCrashCleaner() as cleaner:
             try:
-                   os_volume_temp = cinder.restores.restore(backup_id=snapshot_id,name=name,description=description)
+                   os_volume_temp = cinder.restores.restore(backup_id=snapshot_id,name=name,description=description,volume_type=volume_type)
             except cinder_exception.NotFound:
                    raise exception.InvalidSnapshotNotFound(id=snapshot_id)
             os_volume=cinder.volumes.get(os_volume_temp.volume_id)
@@ -63,7 +63,7 @@ def create_volume(context, size=None, snapshot_id=None,
         raise exception.InvalidInput(reason=msg)
 
     with common.OnCrashCleaner() as cleaner:
-        os_volume_temp = cinder.restores.restore(backup_id=snapshot_id, volume_size=size,name=name,description=description)
+        os_volume_temp = cinder.restores.restore(backup_id=snapshot_id, volume_size=size,name=name,description=description,volume_type=volume_type)
         os_volume=cinder.volumes.get(os_volume_temp.volume_id)
         cleaner.addCleanup(os_volume.delete)
         return _format_volume(context, os_volume)
