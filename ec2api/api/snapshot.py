@@ -220,4 +220,5 @@ def _format_snapshot(context, os_snapshot):
             'volumeId': os_snapshot.volume_id,
             'volumeSize': os_snapshot.size,
             'status': mapped_status,
-            'startTime': os_snapshot.created_at}
+            'startTime': os_snapshot.created_at,
+            'encrypted':os_snapshot.encrypted}
